@@ -95,6 +95,16 @@ final class Hydrator
                         $value = (array)$val;
                     }
                 }
+                // --- enum/set ------------------------------------------------------
+                elseif (in_array($lc, ['enum', 'set'], true)) {
+                    // For enum: single value as string
+                    // For set: comma-separated values as string or array
+                    if ($lc === 'set' && is_string($val) && str_contains($val, ',')) {
+                        $value = explode(',', $val);
+                    } else {
+                        $value = (string)$val;
+                    }
+                }
                 // --- string (explicit handling for potential JSON in string fields) ---
                 elseif ($lc === 'string' || $lc === 'text') {
                     // Keep as string, but you might want to check for JSON fields here
@@ -155,7 +165,7 @@ final class Hydrator
                     $typeName = strtolower($type->getName());
                     if (in_array($typeName, ['json', 'simple_json'], true)) {
                         $data[$name] = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                    } elseif (in_array($typeName, ['simple_array'], true)) {
+                    } elseif (in_array($typeName, ['simple_array', 'set'], true)) {
                         $data[$name] = implode(',', $value);
                     } else {
                         // Default to JSON for array types
@@ -174,32 +184,6 @@ final class Hydrator
         }
 
         return $data;
-    }
-
-    /**
-     * Check if a string is valid JSON
-     *
-     * @param mixed $string The value to check
-     * @return bool True if the string is valid JSON
-     */
-    private static function isJson(mixed $string): bool
-    {
-        if (!is_string($string)) {
-            return false;
-        }
-
-        $trimmed = trim($string);
-        if ($trimmed === '') {
-            return false;
-        }
-
-        // Quick check for JSON-like structure
-        if (!str_starts_with($trimmed, '[') && !str_starts_with($trimmed, '{')) {
-            return false;
-        }
-
-        json_decode($trimmed);
-        return json_last_error() === JSON_ERROR_NONE;
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace MonkeysLegion\Entity\Attributes;
@@ -72,6 +73,7 @@ use Attribute;
  *   • unique         (bool)        — add UNIQUE constraint
  *   • unsigned       (bool)        — for integer types
  *   • autoIncrement  (bool)        — for primary IDs
+ *   • enumValues     (array|null)  — allowed values for enum/set types
  *   • comment        (string|null) — add a column comment
  *
  * Example:
@@ -84,6 +86,13 @@ use Attribute;
  *       comment: 'Order total'
  *   )]
  *   private string $total;
+ *
+ *   #[Field(
+ *       type: 'enum',
+ *       enumValues: ['active', 'inactive', 'pending'],
+ *       default: 'pending'
+ *   )]
+ *   private string $status;
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final class Field
@@ -100,6 +109,7 @@ final class Field
      * @param bool        $unsigned     Whether the field is unsigned (for integer types).
      * @param bool        $autoIncrement Whether the field is an auto-incrementing primary key.
      * @param bool        $primaryKey   Whether the field is a primary key.
+     * @param array|null  $enumValues   Allowed values for enum/set types.
      * @param string|null $comment      Optional comment for the field.
      */
     public function __construct(
@@ -113,6 +123,7 @@ final class Field
         public bool        $unsigned      = false,
         public bool        $autoIncrement = false,
         public bool        $primaryKey    = false,
+        public ?array      $enumValues    = null,
         public ?string     $comment       = null,
     ) {}
 }
